@@ -1,4 +1,6 @@
 import vim
+import rc.debug as d
+from rc.json import to_json
 
 class Cursor(object):
 
@@ -13,11 +15,16 @@ class VimPy(object):
 
     def __init__(self):
         self.cursor = Cursor()
+        self.args = self._parse_args()
 
     def echo(self, to_echo):
         vim.command(""":echo '%s' """ % to_echo)
 
-    def get_args(self):
-        result = vim.eval("a:000")
+    def _parse_args(self):
+        return vim.eval("a:000")
+
+    @property
+    def buffer_file(self):
+        return vim.current.buffer.name
 
 vimpy = VimPy()
