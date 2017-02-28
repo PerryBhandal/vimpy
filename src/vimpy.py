@@ -34,7 +34,7 @@ class VimPy(object):
         if action_name == "print_lines":
             print("Cursor is at row %d, col %d in file %s" % (self.cursor.row, self.cursor.col, self.buffer_file))
             line = open(self.buffer_file, "r").readlines()
-            print(line[self.cursor.row+1])
+            print(line[self.cursor.row-1])
         else:
             print("ERROR: Action not found.")
 
