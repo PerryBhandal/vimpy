@@ -1,7 +1,91 @@
+import sys
+sys.path.append("/home/perry/work/git/rclib/src/")
 import vim, re
 import rc.debug as d
 from rc.json import to_json
-import events
+
+TO_GEN = """BufNewFile
+BufReadPre
+BufRead
+BufReadPost
+BufReadCmd
+FileReadPre
+FileReadPost
+FileReadCmd
+FilterReadPre
+FilterReadPost
+StdinReadPre
+StdinReadPost
+BufWrite
+BufWritePre
+BufWritePost
+BufWriteCmd
+FileWritePre
+FileWritePost
+FileWriteCmd
+FileAppendPre
+FileAppendPost
+FileAppendCmd
+FilterWritePre
+FilterWritePost
+BufAdd
+BufCreate
+BufDelete
+BufWipeout
+BufFilePre
+BufFilePost
+BufEnter
+BufLeave
+BufWinEnter
+BufWinLeave
+BufUnload
+BufHidden
+BufNew
+SwapExists
+FileType
+Syntax
+EncodingChanged
+TermChanged
+VimEnter
+GUIEnter
+TermResponse
+VimLeavePre
+VimLeave
+FileChangedShell
+FileChangedShellPost
+FileChangedRO
+ShellCmdPost
+ShellFilterPost
+FuncUndefined
+SpellFileMissing
+SourcePre
+SourceCmd
+VimResized
+FocusGained
+FocusLost
+CursorHold
+CursorHoldI
+CursorMoved
+CursorMovedI
+WinEnter
+WinLeave
+TabEnter
+TabLeave
+CmdwinEnter
+CmdwinLeave
+InsertEnter
+InsertChange
+InsertLeave
+ColorScheme
+RemoteReply
+QuickFixCmdPre
+QuickFixCmdPost
+SessionLoadPost
+MenuPopup
+User"""
+
+
+VIM_EVENTS = TO_GEN.split("\n")
 
 class Cursor(object):
 
@@ -41,11 +125,14 @@ class VimPy(object):
         if action_name == "print_lines":
             print(self.line)
         elif action_name == "register_events":
-            for event in events.VIM_EVENTS.split("\n"):
+            for event in VIM_EVENTS:
                 vim.command(""":autocmd %s * :call RCFunc("event_fired", "%s")""" % (event, event))
         elif action_name == "event_fired":
-            with open("/home/perry/dump.txt", "w+") as f:
-                f.write("Event fired: %s\n" % self.args[1])
+            pass
+            #self.echo("%s fired" % self.args[1])
+            #vim.command(""":!echo %s > /home/perry/go.txt""" % action_name)
+#             print("Even
+                # ("Event fired: %s\n" % self.args[1])
         else:
             print("ERROR: Action not found.")
 
