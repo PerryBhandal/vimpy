@@ -3,6 +3,7 @@ sys.path.append("/home/perry/work/git/rclib/src/")
 import vim, re
 import rc.debug as d
 from rc.json import to_json
+import requests
 
 TO_GEN = """BufNewFile
 BufReadPre
@@ -96,6 +97,19 @@ class Cursor(object):
         self.row = int(result[1])
         self.col = int(result[2])
 
+class AsyncRequest(object):
+
+    def send(self):
+        requests.post("http://localhost:5000", data = to_json(self))
+
+    def get_data(self):
+        raise RuntimeError("Must override get data")
+
+class AutoCompl(AsyncRequest):
+
+    def __init__(self, cursor):
+        self.cursor = cursor
+
 class VimPy(object):
 
     def __init__(self):
@@ -122,13 +136,27 @@ class VimPy(object):
     def run_action(self):
         action_name = self.args[0]
 
+        class SomeObject(object):
+
+            def __init__(self, name):
+                self.name = name
+
         if action_name == "print_lines":
-            print(self.line)
+            pass
+        elif action_name == "auto_complete":
+            line_data = self.line
+            curs = Cursor()
+            AutoCompl(curs).send()
+
+            print("%s:%s" % (curs.row, curs.col))
+            sliced = line_data[curs.col-1:-1]
+            print(sliced)
+
         elif action_name == "register_events":
             for event in VIM_EVENTS:
                 vim.command(""":autocmd %s * :call RCFunc("event_fired", "%s")""" % (event, event))
         elif action_name == "event_fired":
-            pass
+            self.echo("hi")
             #self.echo("%s fired" % self.args[1])
             #vim.command(""":!echo %s > /home/perry/go.txt""" % action_name)
 #             print("Even
