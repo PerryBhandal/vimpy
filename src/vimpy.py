@@ -85,6 +85,11 @@ SessionLoadPost
 MenuPopup
 User"""
 
+TO_GEN = """CursorMoved
+CursorHold
+CursorHoldI
+CursorMovedI"""
+
 
 VIM_EVENTS = TO_GEN.split("\n")
 
@@ -107,8 +112,9 @@ class AsyncRequest(object):
 
 class AutoCompl(AsyncRequest):
 
-    def __init__(self, cursor):
+    def __init__(self, cursor, buffer_name):
         self.cursor = cursor
+        self.buffer_name = buffer_name
 
 class VimPy(object):
 
@@ -129,9 +135,13 @@ class VimPy(object):
 
     @property
     def line(self):
-        code = open(self.buffer_file, "r").readlines()
-        line = code[self.cursor.row-1]
-        return line
+        buffer_name = self.buffer_file
+        if "vimpy.py" not in buffer_name:
+            code = open(buffer_name, "r").readlines()
+            line = code[self.cursor.row-1]
+            return line
+        else:
+            print("ERROR: Tried to run a command on vimpy.py")
 
     def run_action(self):
         action_name = self.args[0]
@@ -142,25 +152,24 @@ class VimPy(object):
                 self.name = name
 
         if action_name == "print_lines":
+            #print("Line is %s" % self.line)
             pass
         elif action_name == "auto_complete":
             line_data = self.line
             curs = Cursor()
-            AutoCompl(curs).send()
+            AutoCompl(curs, self.buffer_file).send()
 
-            print("%s:%s" % (curs.row, curs.col))
+            #print("%s:%s" % (curs.row, curs.col))
             sliced = line_data[curs.col-1:-1]
-            print(sliced)
+            #print(sliced)
 
         elif action_name == "register_events":
             for event in VIM_EVENTS:
                 vim.command(""":autocmd %s * :call RCFunc("event_fired", "%s")""" % (event, event))
         elif action_name == "event_fired":
-            self.echo("hi")
-            #self.echo("%s fired" % self.args[1])
-            #vim.command(""":!echo %s > /home/perry/go.txt""" % action_name)
-#             print("Even
-                # ("Event fired: %s\n" % self.args[1])
+            with open("/home/perry/go.txt", "a") as f:
+                f.write("Event fired\n")
+            #vim.command(""":!echo %s >> /home/perry/go.txt""" % self.args[1])
         else:
             print("ERROR: Action not found.")
 
